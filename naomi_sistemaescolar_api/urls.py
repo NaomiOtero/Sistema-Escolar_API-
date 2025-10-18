@@ -3,17 +3,34 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from .views.bootstrap import VersionView
-from naomi_sistemaescolar_api.views.users import AdminView
-from naomi_sistemaescolar_api.views.alumnos import AlumnosView
-from naomi_sistemaescolar_api.views.maestro import MaestroView
+from naomi_sistemaescolar_api.views import bootstrap
+from naomi_sistemaescolar_api.views import users
+from naomi_sistemaescolar_api.views import alumnos
+from naomi_sistemaescolar_api.views import maestro
+from naomi_sistemaescolar_api.views import auth
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("api-auth/", include("rest_framework.urls")),
-    path("api/version/", VersionView.as_view(), name="api-version"),
-    path("api/admin/", AdminView.as_view(), name="admin-register"),
-    path ("api/alumno/", AlumnosView.as_view(), name="alumno-register"),
-    path("api/maestro/", MaestroView.as_view(), name="maestro-register"),
+    #crear admin
+        path('admin/', users.AdminView.as_view()),
+    #admin data
+        path('Lista-admins/', users.AdminAll.as_view()),
+    #Edit Admin
+       # path('admins_edit/', users.AdminViewEdit.as_view()),
+
+       #crear admin
+        path('alumno/', alumnos.AlumnosView.as_view()),
+    #admin data
+        path('Lista-alumnos/', alumnos.AlumnosAll.as_view()),
+    #Edit Admin
+       # path('admins_edit/', alumnos.AlumnosViewEdit.as_view()),
+
+       #crear admin
+        path('maestro/', maestro.MaestroView.as_view()),
+    #admin data
+        path('Lista-maestros/', maestro.MaestrosAll.as_view()),
+    #Edit Admin
+       # path('admins_edit/', maestro.MaestroViewEdit.as_view()),
+
 ]
 
 if settings.DEBUG:
