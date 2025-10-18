@@ -4,8 +4,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from .views.bootstrap import VersionView
 from naomi_sistemaescolar_api.views.users import AdminView
-from naomi_sistemaescolar_api.views.users import AlumnosView
-from naomi_sistemaescolar_api.views.users import MaestroView
+from naomi_sistemaescolar_api.views.alumnos import AlumnosView
+from naomi_sistemaescolar_api.views.maestro import MaestroView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
