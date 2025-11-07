@@ -10,26 +10,20 @@ from naomi_sistemaescolar_api.views import maestro
 from naomi_sistemaescolar_api.views import auth
 
 urlpatterns = [
-    #crear admin
+    #Create Admin
         path('admin/', users.AdminView.as_view()),
-    #admin data
-        path('Lista-admins/', users.AdminAll.as_view()),
+    #Admin Data
+        path('lista-admins/', users.AdminAll.as_view()),
     #Edit Admin
-       # path('admins_edit/', users.AdminViewEdit.as_view()),
-
-       #crear admin
-        path('alumno/', alumnos.AlumnosView.as_view()),
-    #admin data
-        path('Lista-alumnos/', alumnos.AlumnosAll.as_view()),
-    #Edit Admin
-       # path('admins_edit/', alumnos.AlumnosViewEdit.as_view()),
-
-       #crear admin
-        path('maestro/', maestro.MaestroView.as_view()),
-    #admin data
-        path('Lista-maestros/', maestro.MaestrosAll.as_view()),
-    #Edit Admin
-       # path('admins_edit/', maestro.MaestroViewEdit.as_view()),
+        #path('admins-edit/', users.AdminsViewEdit.as_view())
+    #Create Alumno
+        path('alumnos/', alumnos.AlumnosView.as_view()),
+    #Create Maestro
+        path('maestros/', maestro.MaestrosView.as_view()),
+    #Login
+        path('token/', auth.CustomAuthToken.as_view()),
+    #Logout
+        path('logout/', auth.Logout.as_view())
 
 ]
 

@@ -8,22 +8,22 @@ from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth.models import Group
-import json
+
 
 class AlumnosAll(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     def get(self, request, *args, **kwargs):
-        user = request.user
-        #TODO: Regresar perfil del usuario
-        return Response({})
+        alumnos = Alumnos.objects.filter(user__is_active=1).order_by('id')
+        lista = AlumnoSerializer(alumnos, many=True).data
+        
+        return Response(lista, 200)
     
 class AlumnosView(generics.CreateAPIView):
-    permission_classes = (permissions.AllowAny,)  # Puedes cambiar esto si necesitas autenticación
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
-        user = UserSerializer(data=request.data)
 
+        user = UserSerializer(data=request.data)
         if user.is_valid():
             role = request.data['rol']
             first_name = request.data['first_name']
@@ -32,6 +32,7 @@ class AlumnosView(generics.CreateAPIView):
             password = request.data['password']
 
             existing_user = User.objects.filter(email=email).first()
+
             if existing_user:
                 return Response({"message": "El correo ya está registrado"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -63,6 +64,6 @@ class AlumnosView(generics.CreateAPIView):
             
             alumno.save()
 
-            return Response({"student_created_id": alumno.id}, status=status.HTTP_201_CREATED)
+            return Response({"ALumno creado con iD": alumno.id}, status=status.HTTP_201_CREATED)
 
         return Response(user.errors, status=status.HTTP_400_BAD_REQUEST)
