@@ -9,22 +9,46 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth.models import Group
 import json
+from django.shortcuts import get_object_or_404
 
 class MaestrosAll(generics.CreateAPIView):
     # Necesita permisos de autenticación de usuario para poder acceder a la petición
+    #verficamos que el usuario esté autenticado
     permission_classes = (permissions.IsAuthenticated,)
     def get(self, request, *args, **kwargs):
         maestros = Maestros.objects.filter(user__is_active=1).order_by("id")
-        lista = MaestrosSerializer(maestros, many=True).data
-        for maestro in lista:
+        maestros = MaestrosSerializer(maestros, many=True).data
+        for maestro in maestros:
             if isinstance(maestro, dict) and "materias_json" in maestro:
                 try:
                     maestro["materias_json"] = json.loads(maestro["materias_json"])
                 except Exception:
                     maestro["materias_json"] = []
-        return Response(lista, 200)
+        return Response(maestros, 200)
     
 class MaestrosView(generics.CreateAPIView):
+
+    def get_permissions(self):
+        if self.request.method in ['GET', 'PUT', 'DELETE']:
+            return [permissions.IsAuthenticated()]
+        return []  # POST no requiere autenticación
+    
+    #Obtener maestro por ID
+    # TODO: Agregar obtención de maestro por ID
+    
+    #Obtener usuario por ID
+    permission_classes = (permissions.IsAuthenticated,)
+    def get(self, request, *args, **kwargs):
+        maestro = get_object_or_404(Maestros, id = request.GET.get("id"))
+        maestro = MaestrosSerializer(maestro, many=False).data
+        if isinstance(maestro, dict) and "materias_json" in maestro:
+            try:
+                maestro["materias_json"] = json.loads(maestro["materias_json"])
+            except Exception:
+                maestro["materias_json"] = []
+        # Si todo es correcto, regresamos la información
+        return Response(maestro, 200)
+    
     #Registrar nuevo usuario maestro
     @transaction.atomic
     def post(self, request, *args, **kwargs):
@@ -62,3 +86,52 @@ class MaestrosView(generics.CreateAPIView):
             maestro.save()
             return Response({"maestro_created_id": maestro.id }, 201)
         return Response(user.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+     # Actualizar datos del maestro
+    @transaction.atomic
+    def put(self, request, *args, **kwargs):
+        # Verificamos que el usuario esté autenticado
+        permission_classes = (permissions.IsAuthenticated,)
+        # Primero obtenemos el administrador a actualizar
+        maestro = get_object_or_404(Maestros, id=request.data["id"])
+        maestro.id_maestro = request.data["id_maestro"]
+        maestro.telefono = request.data["telefono"]
+        maestro.fecha_nacimiento = request.data["fecha_nacimiento"]
+        maestro.materias_json = json.dumps(request.data["materias_json"])
+        maestro.rfc = request.data["rfc"]
+        maestro.cubiculo = request.data["cubiculo"]
+        maestro.area_investigacion = request.data["area_investigacion"]
+        maestro.save()
+        # Actualizamos los datos del usuario asociado (tabla auth_user de Django)
+        user = maestro.user
+        user.first_name = request.data["first_name"]
+        user.last_name = request.data["last_name"]
+        user.save()
+        
+        return Response({"message": "Maestro actualizado correctamente", "maestro": MaestrosSerializer(maestro).data}, 200)
+        # return Response(user,200)
+
+    # Eliminar maestro con delete (Borrar realmente)
+    @transaction.atomic
+    def delete(self, request, *args, **kwargs):
+        maestro = get_object_or_404(Maestros, id=request.GET.get("id"))
+        try:
+            maestro.user.delete()
+            return Response({"details":"Maestro eliminado"},200)
+        except Exception as e:
+            return Response({"details":"Algo pasó al eliminar"},400)
+    
+    #Eliminar maestro (Desactivar usuario)
+    # @transaction.atomic
+    # def delete(self, request, *args, **kwargs):
+    #     id_maestro = kwargs.get('id_maestro', None)
+    #     if id_maestro:
+    #         try:
+    #             maestro = Maestros.objects.get(id=id_maestro)
+    #             user = maestro.user
+    #             user.is_active = 0
+    #             user.save()
+    #             return Response({"message":"Maestro con ID "+str(id_maestro)+" eliminado correctamente."},200)
+    #         except Maestros.DoesNotExist:
+    #             return Response({"message":"Maestro con ID "+str(id_maestro)+" no encontrado."},404)
+    #     return Response({"message":"Se necesita el ID del maestro."},400)   

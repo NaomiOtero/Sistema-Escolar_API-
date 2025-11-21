@@ -7,6 +7,8 @@ from naomi_sistemaescolar_api.models import *
 from rest_framework import permissions
 from rest_framework import generics
 from rest_framework import status
+import json
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from django.contrib.auth.models import Group
 
@@ -20,6 +22,20 @@ class AdminAll(generics.CreateAPIView):
         return Response(lista, 200)
 
 class AdminView(generics.CreateAPIView):
+    #Obtener usuario por ID
+    def get_permissions(self):
+        if self.request.method in ['GET', 'PUT','DELETE']:
+            return [permissions.IsAuthenticated()]
+        return []
+    
+    #obtener administrador por ID
+    permission_classes = (permissions)
+    def get(self, request, *args, **kwargs):
+        admin = get_object_or_404(Administradores, id = request.GET.get("id"))
+        admin = AdminSerializer(admin, many=False).data
+        # Si todo es correcto, regresamos la información
+        return Response(admin, 200)
+    
     #Registrar nuevo usuario
     @transaction.atomic
     def post(self, request, *args, **kwargs):
@@ -67,3 +83,36 @@ class AdminView(generics.CreateAPIView):
             return Response({"admin_created_id": admin.id }, 201)
 
         return Response(user.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+     # Actualizar datos del administrador
+    @transaction.atomic
+    def put(self, request, *args, **kwargs):
+        # Verificamos que el usuario esté autenticado
+        permission_classes = (permissions.IsAuthenticated,)
+        # Primero obtenemos el administrador a actualizar
+        admin = get_object_or_404(Administradores, id=request.data["id"])
+        admin.clave_admin = request.data["clave_admin"]
+        admin.telefono = request.data["telefono"]
+        admin.rfc = request.data["rfc"]
+        admin.edad = request.data["edad"]
+        admin.ocupacion = request.data["ocupacion"]
+        admin.save()
+        # Actualizamos los datos del usuario asociado (tabla auth_user de Django)
+        user = admin.user
+        user.first_name = request.data["first_name"]
+        user.last_name = request.data["last_name"]
+        user.save()
+        
+        return Response({"message": "Administrador actualizado correctamente", "admin": AdminSerializer(admin).data}, 200)
+        # return Response(user,200)
+
+     # Eliminar maestro con delete (Borrar realmente)
+    @transaction.atomic
+    def delete(self, request, *args, **kwargs):
+        admin = get_object_or_404(Administradores, id=request.GET.get("id"))
+        try:
+            admin.user.delete()
+            return Response({"details":"Administrador eliminado"},200)
+        except Exception as e:
+            return Response({"details":"Algo pasó al eliminar"},400)
+    
