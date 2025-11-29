@@ -60,3 +60,22 @@ class Maestros(models.Model):
 
     def __str__(self):
         return f"Maestro: {self.user.first_name} {self.user.last_name}"
+    
+class Eventos(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False, default=None)
+    name_event = models.CharField(max_length=255, null=False, blank=False)
+    tipo_evento = models.TextField(null=True, blank=True)
+    fecha = models.DateField(null=False, blank=False)
+    hora_inicio = models.TimeField(null=False, blank=False)
+    hora_final = models.TimeField(null=True, blank=True)
+    objetivo_json = models.TextField(null=True, blank=True)  # Materias relacionadas como JSON
+    lugar = models.CharField(max_length=255, null=True, blank=True)
+    programa_educativo = models.CharField(max_length=255, null=True, blank=True)
+    responsable_evento = models.CharField(max_length=255, null=True, blank=True)
+    descripcion = models.TextField(null=True, blank=True)
+    Asistentes = models.TextField(null=True, blank=True)  # Asistentes como JSON
+    update = models.DateTimeField(auto_now=True, null=True, blank=True)
+
+    def __str__(self):
+        return f"Evento: {self.name_event} el {self.fecha}"

@@ -29,3 +29,9 @@ class MaestrosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Maestros
         fields = '__all__'
+
+class EventosSerializer(serializers.ModelSerializer):
+    user=UserSerializer(read_only=True)
+    class Meta:
+        model = Eventos
+        fields = '__all__'

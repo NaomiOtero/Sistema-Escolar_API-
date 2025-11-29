@@ -3,7 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from .views.bootstrap import VersionView
-from naomi_sistemaescolar_api.views import bootstrap
+from naomi_sistemaescolar_api.views import bootstrap, eventos
 from naomi_sistemaescolar_api.views import users
 from naomi_sistemaescolar_api.views import alumnos
 from naomi_sistemaescolar_api.views import maestro
@@ -28,7 +28,12 @@ urlpatterns = [
         path('logout/', auth.Logout.as_view()),
     #total usarios
         #Total Users
-        path('total-usuarios/', users.TotalUsers.as_view())
+        path('total-usuarios/', users.TotalUsers.as_view()),
+    #links para eventos 
+    #Create Evento
+        path('eventos/', eventos.EventosView.as_view()),
+        #Lista Eventos
+        path('lista-eventos/', eventos.EventosAll.as_view()),
 
 ]
 
