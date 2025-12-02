@@ -29,6 +29,9 @@ urlpatterns = [
     #total usarios
         #Total Users
         path('total-usuarios/', users.TotalUsers.as_view()),
+    #total eventos
+        #Total Eventos
+        path('total-eventos/', eventos.TotalEventos.as_view()),
     #links para eventos 
     #Create Evento
         path('eventos/', eventos.EventosView.as_view()),

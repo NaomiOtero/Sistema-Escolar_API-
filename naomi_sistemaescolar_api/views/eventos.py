@@ -50,7 +50,6 @@ class EventosView(generics.CreateAPIView):
 
         return Response(data, status=200)
 
-        # Crear Evento
     @transaction.atomic
     def post(self, request, *args, **kwargs):
 
@@ -103,3 +102,38 @@ class EventosView(generics.CreateAPIView):
             return Response({"details": "Evento eliminado"}, status=200)
         except:
             return Response({"details": "Error al eliminar"}, status=400)
+        
+class TotalEventos(generics.CreateAPIView):
+
+    def get(self, request, *args, **kwargs):
+        eventos_qs = Eventos.objects.filter(user__is_active=True)
+
+        total_estudiantes = 0
+        total_profesores = 0
+        total_publico = 0
+
+        for e in eventos_qs:
+            # e.objetivo_json viene como str en la BD (JSON serializado)
+            try:
+                objetivos = json.loads(e.objetivo_json)
+            except:
+                objetivos = []
+
+            # objetivos es ahora una lista: ["1"], ["2"], ["1","3"], etc.
+            for objetivo in objetivos:
+                tipo = str(objetivo)  # convertir cada elemento a string
+                if tipo == "Estudiantes":
+                    total_estudiantes += 1
+                elif tipo == "Profesores":
+                    total_profesores += 1
+                elif tipo == "Publico General":
+                    total_publico += 1
+
+        return Response(
+            {
+                "estudiantes": total_estudiantes,
+                "profesores": total_profesores,
+                "publico": total_publico
+            },
+            status=200
+        )

@@ -145,7 +145,7 @@ class TotalUsers(generics.CreateAPIView):
             {
                 "admins": total_admins,
                 "maestros": total_maestros,
-                "alumnos": total_alumnos
+                "alumnos": total_alumnos,
             },
             status=200
         )
